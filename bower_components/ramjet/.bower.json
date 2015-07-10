@@ -1,0 +1,24 @@
+{
+  "name": "ramjet",
+  "homepage": "http://www.rich-harris.co.uk/ramjet/",
+  "authors": [
+    "Rich Harris <richard.a.harris@gmail.com>"
+  ],
+  "description": "Transform DOM elements into each another with smooth transitions",
+  "main": "dist/ramjet.js",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "scripts",
+    "test"
+  ],
+  "_release": "4a952fd87c",
+  "_resolution": {
+    "type": "branch",
+    "branch": "opacity",
+    "commit": "4a952fd87c1f307efa4dcd0195955c9df3e3330a"
+  },
+  "_source": "git://github.com/Rich-Harris/ramjet.git",
+  "_target": "opacity",
+  "_originalSource": "Rich-Harris/ramjet"
+}

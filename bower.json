@@ -1,0 +1,21 @@
+{
+  "name": "angular-ui-router-transition",
+  "version": "0.0.0",
+  "description": "Angular UI-Router animation directive allowing configuration of state transitions",
+  "main": "angular-ui-router-transition.js",
+  "ignore": [
+    "*",
+    "!angular-ui-router-transition.js",
+    "!README.md"
+  ],
+  "dependencies": {
+    "angular": ">=1.2.0",
+    "angular-animate": ">=1.2.0",
+    "gsap": "~1.17.0",
+    "ramjet": "Rich-Harris/ramjet#opacity",
+    "angular-ui-router": "~0.2.15"
+  },
+  "devDependencies": {
+    "mobile-angular-ui": "~1.2.0"
+  }
+}

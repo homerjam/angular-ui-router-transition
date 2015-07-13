@@ -47,7 +47,6 @@
             };
 
             uiRouterTransitionProvider.transition('slideAbove', {
-                engine: uiRouterTransitionProvider.constants.ENGINE_GSAP,
                 duration: 1,
                 ease: 'Quart.easeInOut',
                 css: {
@@ -56,7 +55,6 @@
             });
 
             uiRouterTransitionProvider.transition('slideBelow', {
-                engine: uiRouterTransitionProvider.constants.ENGINE_GSAP,
                 duration: 1,
                 ease: 'Quart.easeInOut',
                 css: {
@@ -65,7 +63,6 @@
             });
 
             uiRouterTransitionProvider.transition('slideLeft', {
-                engine: uiRouterTransitionProvider.constants.ENGINE_GSAP,
                 duration: 1,
                 ease: 'Quint.easeInOut',
                 css: {
@@ -74,7 +71,6 @@
             });
 
             uiRouterTransitionProvider.transition('slideRight', {
-                engine: uiRouterTransitionProvider.constants.ENGINE_GSAP,
                 duration: 1,
                 ease: 'Quint.easeInOut',
                 delay: 0.5,
@@ -84,7 +80,6 @@
             });
 
             uiRouterTransitionProvider.transition('fadeIn', {
-                engine: uiRouterTransitionProvider.constants.ENGINE_GSAP,
                 duration: 0.5,
                 delay: 0.5,
                 css: {
@@ -93,7 +88,6 @@
             });
 
             uiRouterTransitionProvider.transition('fadeOut', {
-                engine: uiRouterTransitionProvider.constants.ENGINE_GSAP,
                 duration: 0.5,
                 css: {
                     opacity: 0,
@@ -101,18 +95,11 @@
             });
 
             uiRouterTransitionProvider.transition('scaleDown', {
-                engine: uiRouterTransitionProvider.constants.ENGINE_GSAP,
                 duration: 0.5,
                 css: {
                     scale: 0,
                     opacity: 0
                 }
-            });
-
-            uiRouterTransitionProvider.transition('ramjet', {
-                engine: uiRouterTransitionProvider.constants.ENGINE_RAMJET,
-                duration: 30,
-                // ease: 'Quint.easeInOut'
             });
 
             // $locationProvider.html5Mode(true);
@@ -131,11 +118,11 @@
                     'uiRouterTransition.main': {
                         enter: {
                             'in': {
-                                transition: 'ramjet',
+                                transition: 'slideAbove',
                                 priority: 99
                             },
                             out: {
-                                transition: 'ramjet',
+                                transition: 'slideBelow',
                                 priority: 99
                             }
                         }

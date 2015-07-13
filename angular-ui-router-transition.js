@@ -10,28 +10,26 @@
 (function() {
     'use strict';
 
-    angular.module('hj.uiRouterTransition', ['ui.router', 'ngAnimate'])
+    angular.module('hj.uiRouterTransition', ['ui.router', 'ngAnimate']);
 
-    .constant('TweenMax', TweenMax)
+    angular.module('hj.uiRouterTransition').constant('TweenMax', TweenMax);
+    angular.module('hj.uiRouterTransition').constant('ramjet', ramjet);
 
-    .provider('uiRouterTransition', function() {
+    angular.module('hj.uiRouterTransition').provider('uiRouterTransition', function() {
         var self = this;
-
-        self.constants = {};
-
-        self.constants.ENGINE_GSAP = 'gsap';
-        self.constants.ENGINE_RAMJET = 'ramjet';
-
-        self._viewElements = {};
 
         self.options = {};
 
         self.options.initialTransitionEnabled = false;
 
+        self.ramjet = {
+            duration: 1000,
+            easing: ramjet.easeInOut
+        };
+
         self.transitions = {};
 
         self.transitions.above = {
-            engine: self.constants.ENGINE_GSAP,
             duration: 1,
             ease: 'Quart.easeInOut',
             css: {
@@ -40,7 +38,6 @@
         };
 
         self.transitions.below = {
-            engine: self.constants.ENGINE_GSAP,
             duration: 1,
             ease: 'Quart.easeInOut',
             css: {
@@ -49,7 +46,6 @@
         };
 
         self.transitions.left = {
-            engine: self.constants.ENGINE_GSAP,
             duration: 1,
             ease: 'Quint.easeInOut',
             css: {
@@ -58,7 +54,6 @@
         };
 
         self.transitions.right = {
-            engine: self.constants.ENGINE_GSAP,
             duration: 1,
             ease: 'Quint.easeInOut',
             css: {
@@ -67,7 +62,6 @@
         };
 
         self.transitions.fade = {
-            engine: self.constants.ENGINE_GSAP,
             duration: 0.5,
             css: {
                 opacity: 0
@@ -75,7 +69,6 @@
         };
 
         self.transitions.fadeDelayed = {
-            engine: self.constants.ENGINE_GSAP,
             duration: 0.5,
             delay: 0.5,
             css: {
@@ -84,7 +77,6 @@
         };
 
         self.transitions.none = {
-            engine: self.constants.ENGINE_GSAP,
             duration: 0,
             css: {}
         };
@@ -100,6 +92,8 @@
 
         self.$get = ['$rootScope', '$state', '$document', '$injector', '$timeout', '$q', '$log', 'TweenMax',
             function($rootScope, $state, $document, $injector, $timeout, $q, $log, TweenMax) {
+                var viewElements = {};
+
                 $state.history = [];
                 $state.previous = {};
 
@@ -113,8 +107,8 @@
                     });
                 });
 
-                var getOpts = function(state, view, enterLeave, inOut) {
-                    var opts = {
+                var getOptions = function(state, view, enterLeave, inOut) {
+                    var options = {
                         transition: self.defaults[inOut === 'in' ? 'enter' : 'leave'],
                         priority: 0
                     };
@@ -125,28 +119,28 @@
                                 switch (Object.prototype.toString.call(state.data['uiRouterTransition.' + view][enterLeave][inOut])) {
                                     case '[object Array]':
                                     case '[object Function]':
-                                        opts = $injector.invoke(state.data['uiRouterTransition.' + view][enterLeave][inOut]);
+                                        options = $injector.invoke(state.data['uiRouterTransition.' + view][enterLeave][inOut]);
                                         break;
                                     case '[object Object]':
-                                        opts = angular.extend(opts, state.data['uiRouterTransition.' + view][enterLeave][inOut]);
-                                        Object.keys(opts).forEach(function(key) {
-                                            switch (Object.prototype.toString.call(opts[key])) {
+                                        options = angular.extend(options, state.data['uiRouterTransition.' + view][enterLeave][inOut]);
+                                        Object.keys(options).forEach(function(key) {
+                                            switch (Object.prototype.toString.call(options[key])) {
                                                 case '[object Array]':
                                                 case '[object Function]':
-                                                    opts[key] = $injector.invoke(opts[key]);
+                                                    options[key] = $injector.invoke(options[key]);
                                                     break;
                                             }
                                         });
                                         break;
                                     case '[object String]':
-                                        opts.transition = state.data['uiRouterTransition.' + view][enterLeave][inOut];
+                                        options.transition = state.data['uiRouterTransition.' + view][enterLeave][inOut];
                                         break;
                                 }
                             }
                         }
                     }
 
-                    return opts;
+                    return options;
                 };
 
                 var getTransition = function(transition) {
@@ -172,29 +166,25 @@
                         current = $state.current,
                         previous = $state.previous,
 
-                        currentOpts = getOpts(current, view, 'enter', 'in'),
-                        previousOpts = getOpts(previous, view, 'leave', 'in'),
+                        currentOptions = getOptions(current, view, 'enter', 'in'),
+                        previousOptions = getOptions(previous, view, 'leave', 'in'),
 
                         from;
 
-                    if (!self._viewElements[view]) {
-                        self._viewElements[view] = {};
-                    }
+                    viewElements[view] = element;
 
-                    self._viewElements[view].enter = element;
-
-                    if (previousOpts.priority > currentOpts.priority) {
-                        from = getTransition(previousOpts.transition);
+                    if (previousOptions.priority > currentOptions.priority) {
+                        from = getTransition(previousOptions.transition);
 
                         if (!from) {
-                            $log.error("uiRouterTransition: Invalid transition '" + previousOpts.transition + "'");
+                            $log.error("uiRouterTransition: Invalid transition '" + previousOptions.transition + "'");
                         }
 
                     } else {
-                        from = getTransition(currentOpts.transition);
+                        from = getTransition(currentOptions.transition);
 
                         if (!from) {
-                            $log.error("uiRouterTransition: Invalid transition '" + currentOpts.transition + "'");
+                            $log.error("uiRouterTransition: Invalid transition '" + currentOptions.transition + "'");
                         }
                     }
 
@@ -205,24 +195,13 @@
                         element.removeClass('ui-router-transition-in-setup');
                         element.addClass('ui-router-transition-in');
 
-                        if (from.engine === self.constants.ENGINE_GSAP) {
-                            args.onComplete = function() {
-                                element.addClass('ui-router-transition-in-end');
+                        args.onComplete = function() {
+                            element.addClass('ui-router-transition-in-end');
 
-                                deferred.resolve();
-                            };
+                            deferred.resolve();
+                        };
 
-                            TweenMax.from(element, duration, args);
-                        }
-
-                        if (from.engine === self.constants.ENGINE_RAMJET) {
-                            $timeout(function() {
-                                element.addClass('ui-router-transition-in-end');
-
-                                deferred.resolve();
-                            }, duration * 1000);
-                        }
-
+                        TweenMax.from(element, duration, args);
                     });
 
                     return deferred.promise;
@@ -239,90 +218,68 @@
                         current = $state.current,
                         previous = $state.previous,
 
-                        previousOpts = getOpts(previous, view, 'leave', 'out'),
-                        currentOpts = getOpts(current, view, 'enter', 'out'),
+                        previousOptions = getOptions(previous, view, 'leave', 'out'),
+                        currentOptions = getOptions(current, view, 'enter', 'out'),
 
                         to;
 
-                    if (!self._viewElements[view]) {
-                        self._viewElements[view] = {};
-                    }
-
-                    self._viewElements[view].leave = element;
-
-                    if (currentOpts.priority > previousOpts.priority) {
-                        to = getTransition(currentOpts.transition);
+                    if (currentOptions.priority > previousOptions.priority) {
+                        to = getTransition(currentOptions.transition);
 
                         if (!to) {
-                            $log.error("uiRouterTransition: Invalid transition '" + currentOpts.transition + "'");
+                            $log.error("uiRouterTransition: Invalid transition '" + currentOptions.transition + "'");
                         }
 
                     } else {
-                        to = getTransition(previousOpts.transition);
+                        to = getTransition(previousOptions.transition);
 
                         if (!to) {
-                            $log.error("uiRouterTransition: Invalid transition '" + previousOpts.transition + "'");
+                            $log.error("uiRouterTransition: Invalid transition '" + previousOptions.transition + "'");
                         }
                     }
 
                     var duration = to.duration,
                         args = angular.copy(to);
 
-                    $timeout(function() {
-                        element.removeClass('ui-router-transition-out-setup');
-                        element.addClass('ui-router-transition-out');
+                    element.removeClass('ui-router-transition-out-setup');
+                    element.addClass('ui-router-transition-out');
 
-                        if (to.engine === self.constants.ENGINE_GSAP) {
-                            args.onComplete = function() {
-                                element.remove();
+                    var srcElement = [],
+                        dstElement = [];
 
-                                deferred.resolve();
-                            };
-
-                            TweenMax.to(element, duration, args);
-                        }
-
-                        if (to.engine === self.constants.ENGINE_RAMJET) {
-                            args.duration = duration * 1000;
-
-                            if (args.ease) {
-                                args.easing = args.ease;
-                            }
-
-                            args.useTimer = true; // necessary to make sure tidying up happens
-
-                            var leaveElement = self._viewElements[view].leave[0],
-                                enterElement = self._viewElements[view].enter[0];
-
-                            args.done = function() {
-                                element.remove();
-
-                                deferred.resolve();
-                            };
-
-                            var srcElement = [];
-
-                            ['.ui-router-transition-src', '[ui-router-transition-src]'].forEach(function(selector) {
-                                angular.forEach(leaveElement.querySelectorAll(selector), function(el) {
-                                    srcElement.push(el);
-                                });
-                            });
-
-                            var dstElement = [];
-
-                            ['.ui-router-transition-dst', '[ui-router-transition-dst]'].forEach(function(selector) {
-                                angular.forEach(enterElement.querySelectorAll(selector), function(el) {
-                                    dstElement.push(el);
-                                });
-                            });
-
-                            leaveElement = srcElement.length ? srcElement[0] : leaveElement;
-                            enterElement = dstElement.length ? dstElement[0] : enterElement;
-
-                            ramjet.transform(leaveElement, enterElement, args);
-                        }
-
+                    ['.ui-router-transition-src', '[ui-router-transition-src]'].forEach(function(selector) {
+                        angular.forEach(element[0].querySelectorAll(selector), function(el) {
+                            srcElement.push(el);
+                        });
                     });
+
+                    ['.ui-router-transition-dst', '[ui-router-transition-dst]'].forEach(function(selector) {
+                        angular.forEach(viewElements[view][0].querySelectorAll(selector), function(el) {
+                            dstElement.push(el);
+                        });
+                    });
+
+                    if (srcElement.length && dstElement.length) {
+                        var ramjetOptions = self.ramjet;
+
+                        ramjetOptions.useTimer = true; // necessary to make sure tidying up happens (animationend event doesn't fire if transition canceled)
+
+                        ramjetOptions.done = function() {
+                            ramjet.show(srcElement[0], dstElement[0]);
+                        };
+
+                        ramjet.transform(srcElement[0], dstElement[0], ramjetOptions);
+
+                        ramjet.hide(srcElement[0], dstElement[0]);
+                    }
+
+                    args.onComplete = function() {
+                        element.remove();
+
+                        deferred.resolve();
+                    };
+
+                    TweenMax.to(element, duration, args);
 
                     return deferred.promise;
                 };
@@ -336,9 +293,9 @@
                 };
             }
         ];
-    })
+    });
 
-    .directive('uiRouterTransition', ['$state',
+    angular.module('hj.uiRouterTransition').directive('uiRouterTransition', ['$state',
         function($state) {
             return {
                 priority: 0,
@@ -348,9 +305,9 @@
                 }
             };
         }
-    ])
+    ]);
 
-    .animation('.ui-router-transition', ['$rootScope', 'uiRouterTransition',
+    angular.module('hj.uiRouterTransition').animation('.ui-router-transition', ['$rootScope', 'uiRouterTransition',
         function($rootScope, uiRouterTransition) {
             return {
                 enter: function(element, done) {
